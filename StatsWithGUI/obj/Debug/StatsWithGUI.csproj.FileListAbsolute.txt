@@ -1,0 +1,10 @@
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\bin\Debug\StatsWithGUI.exe.config
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\bin\Debug\StatsWithGUI.exe
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\bin\Debug\StatsWithGUI.pdb
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\obj\Debug\StatsWithGUI.Properties.Resources.resources
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\obj\Debug\StatsWithGUI.csproj.GenerateResource.cache
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\obj\Debug\StatsWithGUI.csproj.CoreCompileInputs.cache
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\obj\Debug\StatsWithGUI.exe
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\obj\Debug\StatsWithGUI.pdb
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\obj\Debug\StatsWithGUI.MainForm.resources
+C:\Users\Администратор\source\repos\StatsWithGUI\StatsWithGUI\obj\Debug\StatsWithGUI.csproj.AssemblyReference.cache
