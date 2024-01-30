@@ -18,6 +18,264 @@ namespace StatsWithGUI
             InitializeComponent();
         }
 
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            // Because the form editor doesn't lemme put text on DropDownLists, I have to manually configure it using code once the form loads.
+            exportType.Text = "One line, commas";
+        }
+
+        // I made this method because there has to be a new instance of a list<double> to prevent tampering with the original
+        private List<double> SortList(List<double> l)
+        {
+            List<double> lSorted = new List<double>();
+            for (int i = 0; i < l.Count; i++) lSorted.Add(l[i]);
+            lSorted.Sort();
+            return lSorted;
+        }
+        private int GetN(List<double> l)
+        {
+            return l.Count;
+        }
+
+        private double GetSum(List<double> l)
+        {
+            double sum = 0;
+            for (int i = 0; i < l.Count; i++)
+            {
+                sum += l[i];
+            }
+            return sum;
+        }
+
+        private double GetMedian(List<double> l)
+        {
+            double median = 0;
+            List<double> lSorted = new List<double>();
+            lSorted = SortList(l);
+            if (GetN(l) % 2 == 1) median = lSorted[((GetN(l) + 1) / 2) - 1];
+            else median = (lSorted[(GetN(l) / 2) - 1] + lSorted[GetN(l) / 2]) / 2;
+            return median;
+        }
+        private double GetMean(List<double> l)
+        {
+            return GetSum(l) / GetN(l);
+        }
+
+        private double GetSD(List<double> l)
+        {
+            double sd = 0;
+            for (int i = 0; i < l.Count; i++) sd += Math.Pow(l[i] - GetMean(l), 2);
+            sd /= l.Count;
+            sd = Math.Sqrt(sd);
+            return sd;
+        }
+        private double GetQ1(List<double> l)
+        {
+            double firstQuartile = 0;
+            List<double> lSorted = new List<double>();
+            lSorted = SortList(l);
+            if (GetN(l) >= 4)
+            {
+                if (GetN(l) % 4 == 1)
+                {
+                    firstQuartile = (lSorted[(GetN(l) - 1) / 4 - 1] + lSorted[(GetN(l) - 1) / 4]) / 2;
+                }
+                if (GetN(l) % 4 == 2)
+                {
+                    firstQuartile = lSorted[(GetN(l) + 2) / 4 - 1];
+                }
+                if (GetN(l) % 4 == 3)
+                {
+                    firstQuartile = lSorted[(GetN(l) + 1) / 4 - 1];
+                }
+                if (GetN(l) % 4 == 0)
+                {
+                    firstQuartile = (lSorted[GetN(l) / 4 - 1] + lSorted[GetN(l) / 4]) / 2;
+                }
+            }
+            else
+            {
+                if (GetN(l) == 1)
+                {
+                    firstQuartile = lSorted[0];
+                }
+                if (GetN(l) == 2)
+                {
+                    firstQuartile = lSorted[0];
+                }
+                if (GetN(l) == 3)
+                {
+                    firstQuartile = lSorted[0];
+                }
+            }
+            return firstQuartile;
+        }
+        private double GetQ3(List<double> l)
+        {
+            double thirdQuartile = 0;
+            List<double> lSorted = new List<double>();
+            lSorted = SortList(l);
+            if (GetN(l) >= 4)
+            {
+                if (GetN(l) % 4 == 1)
+                {
+                    thirdQuartile = (lSorted[GetN(l) - (GetN(l) - 1) / 4 - 1] + lSorted[GetN(l) - (GetN(l) - 1) / 4]) / 2;
+                }
+                if (GetN(l) % 4 == 2)
+                {
+                    thirdQuartile = lSorted[((GetN(l) + 2) / 4) * 3 - 2];
+                }
+                if (GetN(l) % 4 == 3)
+                {
+                    thirdQuartile = lSorted[((GetN(l) + 1) / 4) * 3 - 1];
+                }
+                if (GetN(l) % 4 == 0)
+                {
+                    thirdQuartile = (lSorted[GetN(l) - (GetN(l) / 4) - 1] + lSorted[GetN(l) - (GetN(l) / 4)]) / 2;
+                }
+            }
+            else
+            {
+                if (GetN(l) == 1)
+                {
+                    thirdQuartile = lSorted[0];
+                }
+                if (GetN(l) == 2)
+                {
+                    thirdQuartile = lSorted[1];
+                }
+                if (GetN(l) == 3)
+                {
+                    thirdQuartile = lSorted[2];
+                }
+            }
+            return thirdQuartile;
+        }
+        private double GetIQR(List<double> l)
+        {
+            return GetQ3(l) - GetQ1(l);
+        }
+
+        private double GetZScore(List<double> l, int item)
+        {
+            if (GetSD(l) != 0) return (l[item] - GetMean(l)) / GetSD(l);
+            else return 0;
+        }
+
+        private double GetPercentile(List<double> l, int item)
+        {
+            double originalValue = l[item];
+            List<double> lSorted = new List<double>();
+            lSorted = SortList(l);
+            return ((double)lSorted.IndexOf(originalValue) / (double)l.Count) * 100;
+        }
+
+        private double GetPercentileCDF(List<double> l, int item)
+        {
+            double percentile = 0;
+            // source: https://www.z-table.com/z-scores-to-percentiles-chart.html
+            if (GetZScore(l, item) > -2147483648) percentile = 0;
+            if (GetZScore(l, item) > -2.326) percentile = 1;
+            if (GetZScore(l, item) > -2.054) percentile = 2;
+            if (GetZScore(l, item) > -1.881) percentile = 3;
+            if (GetZScore(l, item) > -1.751) percentile = 4;
+            if (GetZScore(l, item) > -1.645) percentile = 5;
+            if (GetZScore(l, item) > -1.555) percentile = 6;
+            if (GetZScore(l, item) > -1.476) percentile = 7;
+            if (GetZScore(l, item) > -1.405) percentile = 8;
+            if (GetZScore(l, item) > -1.341) percentile = 9;
+            if (GetZScore(l, item) > -1.282) percentile = 10;
+            if (GetZScore(l, item) > -1.227) percentile = 11;
+            if (GetZScore(l, item) > -1.175) percentile = 12;
+            if (GetZScore(l, item) > -1.126) percentile = 13;
+            if (GetZScore(l, item) > -1.08) percentile = 14;
+            if (GetZScore(l, item) > -1.036) percentile = 15;
+            if (GetZScore(l, item) > -0.994) percentile = 16;
+            if (GetZScore(l, item) > -0.954) percentile = 17;
+            if (GetZScore(l, item) > -0.915) percentile = 18;
+            if (GetZScore(l, item) > -0.878) percentile = 19;
+            if (GetZScore(l, item) > -0.842) percentile = 20;
+            if (GetZScore(l, item) > -0.806) percentile = 21;
+            if (GetZScore(l, item) > -0.772) percentile = 22;
+            if (GetZScore(l, item) > -0.739) percentile = 23;
+            if (GetZScore(l, item) > -0.706) percentile = 24;
+            if (GetZScore(l, item) > -0.674) percentile = 25;
+            if (GetZScore(l, item) > -0.643) percentile = 26;
+            if (GetZScore(l, item) > -0.613) percentile = 27;
+            if (GetZScore(l, item) > -0.583) percentile = 28;
+            if (GetZScore(l, item) > -0.553) percentile = 29;
+            if (GetZScore(l, item) > -0.524) percentile = 30;
+            if (GetZScore(l, item) > -0.496) percentile = 31;
+            if (GetZScore(l, item) > -0.468) percentile = 32;
+            if (GetZScore(l, item) > -0.44) percentile = 33;
+            if (GetZScore(l, item) > -0.412) percentile = 34;
+            if (GetZScore(l, item) > -0.385) percentile = 35;
+            if (GetZScore(l, item) > -0.358) percentile = 36;
+            if (GetZScore(l, item) > -0.332) percentile = 37;
+            if (GetZScore(l, item) > -0.305) percentile = 38;
+            if (GetZScore(l, item) > -0.279) percentile = 39;
+            if (GetZScore(l, item) > -0.253) percentile = 40;
+            if (GetZScore(l, item) > -0.228) percentile = 41;
+            if (GetZScore(l, item) > -0.202) percentile = 42;
+            if (GetZScore(l, item) > -0.176) percentile = 43;
+            if (GetZScore(l, item) > -0.151) percentile = 44;
+            if (GetZScore(l, item) > -0.126) percentile = 45;
+            if (GetZScore(l, item) > -0.1) percentile = 46;
+            if (GetZScore(l, item) > -0.075) percentile = 47;
+            if (GetZScore(l, item) > -0.05) percentile = 48;
+            if (GetZScore(l, item) > -0.025) percentile = 49;
+            if (GetZScore(l, item) > 0) percentile = 50;
+            if (GetZScore(l, item) > 0.025) percentile = 51;
+            if (GetZScore(l, item) > 0.05) percentile = 52;
+            if (GetZScore(l, item) > 0.075) percentile = 53;
+            if (GetZScore(l, item) > 0.1) percentile = 54;
+            if (GetZScore(l, item) > 0.126) percentile = 55;
+            if (GetZScore(l, item) > 0.151) percentile = 56;
+            if (GetZScore(l, item) > 0.176) percentile = 57;
+            if (GetZScore(l, item) > 0.202) percentile = 58;
+            if (GetZScore(l, item) > 0.228) percentile = 59;
+            if (GetZScore(l, item) > 0.253) percentile = 60;
+            if (GetZScore(l, item) > 0.279) percentile = 61;
+            if (GetZScore(l, item) > 0.305) percentile = 62;
+            if (GetZScore(l, item) > 0.332) percentile = 63;
+            if (GetZScore(l, item) > 0.358) percentile = 64;
+            if (GetZScore(l, item) > 0.385) percentile = 65;
+            if (GetZScore(l, item) > 0.412) percentile = 66;
+            if (GetZScore(l, item) > 0.44) percentile = 67;
+            if (GetZScore(l, item) > 0.468) percentile = 68;
+            if (GetZScore(l, item) > 0.496) percentile = 69;
+            if (GetZScore(l, item) > 0.524) percentile = 70;
+            if (GetZScore(l, item) > 0.553) percentile = 71;
+            if (GetZScore(l, item) > 0.583) percentile = 72;
+            if (GetZScore(l, item) > 0.613) percentile = 73;
+            if (GetZScore(l, item) > 0.643) percentile = 74;
+            if (GetZScore(l, item) > 0.674) percentile = 75;
+            if (GetZScore(l, item) > 0.706) percentile = 76;
+            if (GetZScore(l, item) > 0.739) percentile = 77;
+            if (GetZScore(l, item) > 0.772) percentile = 78;
+            if (GetZScore(l, item) > 0.806) percentile = 79;
+            if (GetZScore(l, item) > 0.842) percentile = 80;
+            if (GetZScore(l, item) > 0.878) percentile = 81;
+            if (GetZScore(l, item) > 0.915) percentile = 82;
+            if (GetZScore(l, item) > 0.954) percentile = 83;
+            if (GetZScore(l, item) > 0.994) percentile = 84;
+            if (GetZScore(l, item) > 1.036) percentile = 85;
+            if (GetZScore(l, item) > 1.08) percentile = 86;
+            if (GetZScore(l, item) > 1.126) percentile = 87;
+            if (GetZScore(l, item) > 1.175) percentile = 88;
+            if (GetZScore(l, item) > 1.227) percentile = 89;
+            if (GetZScore(l, item) > 1.282) percentile = 90;
+            if (GetZScore(l, item) > 1.341) percentile = 91;
+            if (GetZScore(l, item) > 1.405) percentile = 92;
+            if (GetZScore(l, item) > 1.476) percentile = 93;
+            if (GetZScore(l, item) > 1.555) percentile = 94;
+            if (GetZScore(l, item) > 1.645) percentile = 95;
+            if (GetZScore(l, item) > 1.751) percentile = 96;
+            if (GetZScore(l, item) > 1.881) percentile = 97;
+            if (GetZScore(l, item) > 2.054) percentile = 98;
+            if (GetZScore(l, item) > 2.326) percentile = 99;
+            return percentile;
+        }
         private void CalculateStatistics()
         {
             if (theList.Items.Count == 0)
@@ -33,202 +291,35 @@ namespace StatsWithGUI
             }
             else
             {
-                // n (amount of items in the list)
-                int n = theList.Items.Count;
-                nTextBox.Text = n.ToString();
-                // sum
-                double sum = 0;
-                for (int i = 0; i < n; i++)
-                {
-                    sum += Double.Parse(theList.Items[i].ToString());
-                }
-                sumTextBox.Text = sum.ToString();
-                // median (we create a list that's specifically sorted, because we have to sort when calculating median.)
-                double median = 0;
-                List<double> sortedList = new List<double>();
-                for (int i = 0; i < n; i++) sortedList.Add(Double.Parse(theList.Items[i].ToString()));
-                sortedList.Sort();
-                if (n % 2 == 1) median = sortedList[((n + 1) / 2) - 1];
-                else median = (sortedList[(n / 2) - 1] + sortedList[n / 2]) / 2;
-                medianTextBox.Text = median.ToString();
-                // mean (on the other hand, for mean we don't have to sort, same with SD)
-                double mean = 0;
-                mean = sum / n;
-                meanTextBox.Text = mean.ToString();
-                // standard deviation
-                double sd = 0;
-                for (int i = 0; i < n; i++) sd += Math.Pow(Double.Parse(theList.Items[i].ToString()) - mean, 2);
-                sd /= n;
-                sd = Math.Sqrt(sd);
-                sdTextBox.Text = sd.ToString();
-                // quartiles 1 and 3, IQR
-                double firstQuartile = 0;
-                double thirdQuartile = 0;
-                double iqr = 0;
-                if (n >= 4)
-                {
-                    if (n % 4 == 1)
-                    {
-                        firstQuartile = (sortedList[(n - 1) / 4 - 1] + sortedList[(n - 1) / 4]) / 2;
-                        thirdQuartile = (sortedList[n - (n - 1) / 4 - 1] + sortedList[n - (n - 1) / 4]) / 2;
-                    }
-                    if (n % 4 == 2)
-                    {
-                        firstQuartile = sortedList[(n + 2) / 4 - 1];
-                        thirdQuartile = sortedList[((n + 2) / 4) * 3 - 2];
-                    }
-                    if (n % 4 == 3)
-                    {
-                        firstQuartile = sortedList[(n + 1) / 4 - 1];
-                        thirdQuartile = sortedList[((n + 1) / 4) * 3 - 1];
-                    }
-                    if (n % 4 == 0)
-                    {
-                        firstQuartile = (sortedList[n / 4 - 1] + sortedList[n / 4]) / 2;
-                        thirdQuartile = (sortedList[n - (n / 4) - 1] + sortedList[n - (n / 4)]) / 2;
-                    }
-                }
-                else
-                {
-                    if (n == 1)
-                    {
-                        firstQuartile = sortedList[0];
-                        thirdQuartile = sortedList[0];
-                    }
-                    if (n == 2)
-                    {
-                        firstQuartile = sortedList[0];
-                        thirdQuartile = sortedList[1];
-                    }
-                    if (n == 3)
-                    {
-                        firstQuartile = sortedList[0];
-                        thirdQuartile = sortedList[2];
-                    }
-                }
-                iqr = thirdQuartile - firstQuartile;
-                q1TextBox.Text = firstQuartile.ToString();
-                q3TextBox.Text = thirdQuartile.ToString();
-                iqrTextBox.Text = iqr.ToString();
+                // copy items from listbox to a list<double>
+                List<double> listDouble = new List<double>();
+                for (int i = 0; i < theList.Items.Count; i++) listDouble.Add(Double.Parse(theList.Items[i].ToString()));
+                nTextBox.Text = GetN(listDouble).ToString();
+                sumTextBox.Text = GetSum(listDouble).ToString();
+                medianTextBox.Text = GetMedian(listDouble).ToString();
+                meanTextBox.Text = GetMean(listDouble).ToString();
+                sdTextBox.Text = GetSD(listDouble).ToString();
+                q1TextBox.Text = GetQ1(listDouble).ToString();
+                q3TextBox.Text = GetQ3(listDouble).ToString();
+                iqrTextBox.Text = GetIQR(listDouble).ToString();
                 // calculate zscore and percentile
                 // if nothing selected, keep the selected item result textboxes blank
                 if (theList.SelectedIndex == -1)
                 {
                     zscoreTextbox.Text = "";
                     percentileTextBox.Text = "";
+                    cdfTextBox.Text = "";
+                    rankCdfDifference.Text = "";
                 }
                 else
                 {
-                    // zscore
-                    double zscore = 0;
-                    // address 0 situation to prevent NaN from happening
-                    if (sd != 0) zscore = (Double.Parse(theList.SelectedItem.ToString()) - mean) / sd;
-                    else zscore = 0;
-                    zscoreTextbox.Text = zscore.ToString();
-                    // percentile
-                    // source: https://www.z-table.com/z-scores-to-percentiles-chart.html
-                    double percentile = 0;
-                    if (zscore > -2147483648) percentile = 0;
-                    if (zscore > -2.326) percentile = 1;
-                    if (zscore > -2.054) percentile = 2;
-                    if (zscore > -1.881) percentile = 3;
-                    if (zscore > -1.751) percentile = 4;
-                    if (zscore > -1.645) percentile = 5;
-                    if (zscore > -1.555) percentile = 6;
-                    if (zscore > -1.476) percentile = 7;
-                    if (zscore > -1.405) percentile = 8;
-                    if (zscore > -1.341) percentile = 9;
-                    if (zscore > -1.282) percentile = 10;
-                    if (zscore > -1.227) percentile = 11;
-                    if (zscore > -1.175) percentile = 12;
-                    if (zscore > -1.126) percentile = 13;
-                    if (zscore > -1.08) percentile = 14;
-                    if (zscore > -1.036) percentile = 15;
-                    if (zscore > -0.994) percentile = 16;
-                    if (zscore > -0.954) percentile = 17;
-                    if (zscore > -0.915) percentile = 18;
-                    if (zscore > -0.878) percentile = 19;
-                    if (zscore > -0.842) percentile = 20;
-                    if (zscore > -0.806) percentile = 21;
-                    if (zscore > -0.772) percentile = 22;
-                    if (zscore > -0.739) percentile = 23;
-                    if (zscore > -0.706) percentile = 24;
-                    if (zscore > -0.674) percentile = 25;
-                    if (zscore > -0.643) percentile = 26;
-                    if (zscore > -0.613) percentile = 27;
-                    if (zscore > -0.583) percentile = 28;
-                    if (zscore > -0.553) percentile = 29;
-                    if (zscore > -0.524) percentile = 30;
-                    if (zscore > -0.496) percentile = 31;
-                    if (zscore > -0.468) percentile = 32;
-                    if (zscore > -0.44) percentile = 33;
-                    if (zscore > -0.412) percentile = 34;
-                    if (zscore > -0.385) percentile = 35;
-                    if (zscore > -0.358) percentile = 36;
-                    if (zscore > -0.332) percentile = 37;
-                    if (zscore > -0.305) percentile = 38;
-                    if (zscore > -0.279) percentile = 39;
-                    if (zscore > -0.253) percentile = 40;
-                    if (zscore > -0.228) percentile = 41;
-                    if (zscore > -0.202) percentile = 42;
-                    if (zscore > -0.176) percentile = 43;
-                    if (zscore > -0.151) percentile = 44;
-                    if (zscore > -0.126) percentile = 45;
-                    if (zscore > -0.1) percentile = 46;
-                    if (zscore > -0.075) percentile = 47;
-                    if (zscore > -0.05) percentile = 48;
-                    if (zscore > -0.025) percentile = 49;
-                    if (zscore > 0) percentile = 50;
-                    if (zscore > 0.025) percentile = 51;
-                    if (zscore > 0.05) percentile = 52;
-                    if (zscore > 0.075) percentile = 53;
-                    if (zscore > 0.1) percentile = 54;
-                    if (zscore > 0.126) percentile = 55;
-                    if (zscore > 0.151) percentile = 56;
-                    if (zscore > 0.176) percentile = 57;
-                    if (zscore > 0.202) percentile = 58;
-                    if (zscore > 0.228) percentile = 59;
-                    if (zscore > 0.253) percentile = 60;
-                    if (zscore > 0.279) percentile = 61;
-                    if (zscore > 0.305) percentile = 62;
-                    if (zscore > 0.332) percentile = 63;
-                    if (zscore > 0.358) percentile = 64;
-                    if (zscore > 0.385) percentile = 65;
-                    if (zscore > 0.412) percentile = 66;
-                    if (zscore > 0.44) percentile = 67;
-                    if (zscore > 0.468) percentile = 68;
-                    if (zscore > 0.496) percentile = 69;
-                    if (zscore > 0.524) percentile = 70;
-                    if (zscore > 0.553) percentile = 71;
-                    if (zscore > 0.583) percentile = 72;
-                    if (zscore > 0.613) percentile = 73;
-                    if (zscore > 0.643) percentile = 74;
-                    if (zscore > 0.674) percentile = 75;
-                    if (zscore > 0.706) percentile = 76;
-                    if (zscore > 0.739) percentile = 77;
-                    if (zscore > 0.772) percentile = 78;
-                    if (zscore > 0.806) percentile = 79;
-                    if (zscore > 0.842) percentile = 80;
-                    if (zscore > 0.878) percentile = 81;
-                    if (zscore > 0.915) percentile = 82;
-                    if (zscore > 0.954) percentile = 83;
-                    if (zscore > 0.994) percentile = 84;
-                    if (zscore > 1.036) percentile = 85;
-                    if (zscore > 1.08) percentile = 86;
-                    if (zscore > 1.126) percentile = 87;
-                    if (zscore > 1.175) percentile = 88;
-                    if (zscore > 1.227) percentile = 89;
-                    if (zscore > 1.282) percentile = 90;
-                    if (zscore > 1.341) percentile = 91;
-                    if (zscore > 1.405) percentile = 92;
-                    if (zscore > 1.476) percentile = 93;
-                    if (zscore > 1.555) percentile = 94;
-                    if (zscore > 1.645) percentile = 95;
-                    if (zscore > 1.751) percentile = 96;
-                    if (zscore > 1.881) percentile = 97;
-                    if (zscore > 2.054) percentile = 98;
-                    if (zscore > 2.326) percentile = 99;
-                    percentileTextBox.Text = percentile.ToString();
+                    zscoreTextbox.Text = GetZScore(listDouble, theList.SelectedIndex).ToString();
+                    percentileTextBox.Text = GetPercentile(listDouble, theList.SelectedIndex).ToString();
+                    cdfTextBox.Text = GetPercentileCDF(listDouble, theList.SelectedIndex).ToString();
+                    if (GetPercentile(listDouble, theList.SelectedIndex) < GetPercentileCDF(listDouble, theList.SelectedIndex))
+                        rankCdfDifference.Text = (GetPercentileCDF(listDouble, theList.SelectedIndex) - GetPercentile(listDouble, theList.SelectedIndex)).ToString();
+                    else
+                        rankCdfDifference.Text = (GetPercentile(listDouble, theList.SelectedIndex) - GetPercentileCDF(listDouble, theList.SelectedIndex)).ToString();
                 }
             }
         }
@@ -256,7 +347,7 @@ namespace StatsWithGUI
                 streamGB.Anchor = AnchorStyles.Top | AnchorStyles.Left;
                 selectedGB.Anchor = AnchorStyles.Top | AnchorStyles.Left;
                 exportType.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-                histogramContainer.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                graphContainer.Anchor = AnchorStyles.Top | AnchorStyles.Left;
                 aboutButton.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             }
             else MessageBox.Show("Statistics Calculator. Made entirely from hand, no ChatGPT. Only Google and StackOverflow.", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -318,12 +409,6 @@ namespace StatsWithGUI
                 }
             }
             SaveFile.Close();
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            // Because the form editor doesn't lemme put text on DropDownLists, I have to manually configure it using code once the form loads.
-            exportType.Text = "One line, commas";
         }
 
         private void importButton_Click(object sender, EventArgs e) => openFileDialog1.ShowDialog();

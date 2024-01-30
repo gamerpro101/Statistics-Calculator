@@ -62,9 +62,11 @@ namespace StatsWithGUI
             this.mode1 = new System.Windows.Forms.RadioButton();
             this.nLabel = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.histogramContainer = new System.Windows.Forms.Panel();
+            this.graphContainer = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.pLabel1 = new System.Windows.Forms.Label();
+            this.differenceLabel = new System.Windows.Forms.Label();
             this.importButton = new System.Windows.Forms.Button();
             this.helpProvider1 = new System.Windows.Forms.HelpProvider();
             this.exportButton = new System.Windows.Forms.Button();
@@ -75,16 +77,18 @@ namespace StatsWithGUI
             this.exportType = new System.Windows.Forms.ComboBox();
             this.exportTypeLabel = new System.Windows.Forms.Label();
             this.selectedGB = new System.Windows.Forms.GroupBox();
+            this.rankCdfDifference = new System.Windows.Forms.TextBox();
+            this.cdfTextBox = new System.Windows.Forms.TextBox();
+            this.pLabel2 = new System.Windows.Forms.Label();
             this.percentileTextBox = new System.Windows.Forms.TextBox();
             this.zscoreTextbox = new System.Windows.Forms.TextBox();
-            this.pLabel = new System.Windows.Forms.Label();
             this.zscoreLabel = new System.Windows.Forms.Label();
             this.addGB.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.frequency)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numberToAdd)).BeginInit();
             this.removeGB.SuspendLayout();
             this.resultsGB.SuspendLayout();
-            this.histogramContainer.SuspendLayout();
+            this.graphContainer.SuspendLayout();
             this.streamGB.SuspendLayout();
             this.selectedGB.SuspendLayout();
             this.SuspendLayout();
@@ -96,7 +100,7 @@ namespace StatsWithGUI
             this.theList.FormattingEnabled = true;
             this.theList.Location = new System.Drawing.Point(12, 12);
             this.theList.Name = "theList";
-            this.theList.Size = new System.Drawing.Size(285, 472);
+            this.theList.Size = new System.Drawing.Size(285, 251);
             this.theList.TabIndex = 0;
             // 
             // addGB
@@ -184,7 +188,7 @@ namespace StatsWithGUI
             // aboutButton
             // 
             this.aboutButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.aboutButton.Location = new System.Drawing.Point(478, 764);
+            this.aboutButton.Location = new System.Drawing.Point(477, 698);
             this.aboutButton.Name = "aboutButton";
             this.aboutButton.Size = new System.Drawing.Size(50, 23);
             this.aboutButton.TabIndex = 2;
@@ -426,20 +430,19 @@ namespace StatsWithGUI
             // timer1
             // 
             this.timer1.Interval = 50;
-            // The interval used to be 1, but I changed it down to 50 so less resources are used.
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // histogramContainer
+            // graphContainer
             // 
-            this.histogramContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.graphContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.histogramContainer.Controls.Add(this.label1);
-            this.histogramContainer.Location = new System.Drawing.Point(12, 570);
-            this.histogramContainer.Name = "histogramContainer";
-            this.histogramContainer.Size = new System.Drawing.Size(515, 188);
-            this.histogramContainer.TabIndex = 5;
-            this.toolTip1.SetToolTip(this.histogramContainer, "I plan to make a histogram calculator. It\'s still a WIP.");
+            this.graphContainer.Controls.Add(this.label1);
+            this.graphContainer.Location = new System.Drawing.Point(12, 491);
+            this.graphContainer.Name = "graphContainer";
+            this.graphContainer.Size = new System.Drawing.Size(515, 201);
+            this.graphContainer.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.graphContainer, "I plan to make a grapher. It\'s still a WIP.");
             // 
             // label1
             // 
@@ -449,6 +452,26 @@ namespace StatsWithGUI
             this.label1.Size = new System.Drawing.Size(112, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Not implemented yet...";
+            // 
+            // pLabel1
+            // 
+            this.pLabel1.AutoSize = true;
+            this.pLabel1.Location = new System.Drawing.Point(7, 52);
+            this.pLabel1.Name = "pLabel1";
+            this.pLabel1.Size = new System.Drawing.Size(95, 13);
+            this.pLabel1.TabIndex = 1;
+            this.pLabel1.Text = "percentile (rank) = ";
+            this.toolTip1.SetToolTip(this.pLabel1, "Right click for options");
+            // 
+            // differenceLabel
+            // 
+            this.differenceLabel.AutoSize = true;
+            this.differenceLabel.Location = new System.Drawing.Point(7, 104);
+            this.differenceLabel.Name = "differenceLabel";
+            this.differenceLabel.Size = new System.Drawing.Size(128, 13);
+            this.differenceLabel.TabIndex = 5;
+            this.differenceLabel.Text = "difference in percentiles =";
+            this.toolTip1.SetToolTip(this.differenceLabel, "Right click for options");
             // 
             // importButton
             // 
@@ -490,7 +513,7 @@ namespace StatsWithGUI
             this.streamGB.Controls.Add(this.exportTypeLabel);
             this.streamGB.Controls.Add(this.importButton);
             this.streamGB.Controls.Add(this.exportButton);
-            this.streamGB.Location = new System.Drawing.Point(12, 489);
+            this.streamGB.Location = new System.Drawing.Point(12, 272);
             this.streamGB.Name = "streamGB";
             this.streamGB.Size = new System.Drawing.Size(285, 75);
             this.streamGB.TabIndex = 8;
@@ -532,47 +555,76 @@ namespace StatsWithGUI
             // 
             // selectedGB
             // 
-            this.selectedGB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.selectedGB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.selectedGB.Controls.Add(this.rankCdfDifference);
+            this.selectedGB.Controls.Add(this.cdfTextBox);
+            this.selectedGB.Controls.Add(this.differenceLabel);
+            this.selectedGB.Controls.Add(this.pLabel2);
             this.selectedGB.Controls.Add(this.percentileTextBox);
             this.selectedGB.Controls.Add(this.zscoreTextbox);
-            this.selectedGB.Controls.Add(this.pLabel);
+            this.selectedGB.Controls.Add(this.pLabel1);
             this.selectedGB.Controls.Add(this.zscoreLabel);
-            this.selectedGB.Location = new System.Drawing.Point(303, 489);
+            this.selectedGB.Location = new System.Drawing.Point(12, 353);
             this.selectedGB.Name = "selectedGB";
-            this.selectedGB.Size = new System.Drawing.Size(224, 75);
+            this.selectedGB.Size = new System.Drawing.Size(285, 132);
             this.selectedGB.TabIndex = 9;
             this.selectedGB.TabStop = false;
             this.selectedGB.Text = "Results for selected item";
             // 
+            // rankCdfDifference
+            // 
+            this.rankCdfDifference.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.rankCdfDifference.Location = new System.Drawing.Point(150, 101);
+            this.rankCdfDifference.Name = "rankCdfDifference";
+            this.rankCdfDifference.ReadOnly = true;
+            this.rankCdfDifference.Size = new System.Drawing.Size(129, 20);
+            this.rankCdfDifference.TabIndex = 7;
+            // 
+            // cdfTextBox
+            // 
+            this.cdfTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cdfTextBox.Location = new System.Drawing.Point(150, 75);
+            this.cdfTextBox.Name = "cdfTextBox";
+            this.cdfTextBox.ReadOnly = true;
+            this.cdfTextBox.Size = new System.Drawing.Size(129, 20);
+            this.cdfTextBox.TabIndex = 6;
+            // 
+            // pLabel2
+            // 
+            this.pLabel2.AutoSize = true;
+            this.pLabel2.Location = new System.Drawing.Point(6, 78);
+            this.pLabel2.Name = "pLabel2";
+            this.pLabel2.Size = new System.Drawing.Size(89, 13);
+            this.pLabel2.TabIndex = 4;
+            this.pLabel2.Text = "percentile (cdf) = ";
+            // 
             // percentileTextBox
             // 
-            this.percentileTextBox.Location = new System.Drawing.Point(116, 45);
+            this.percentileTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.percentileTextBox.Location = new System.Drawing.Point(150, 49);
             this.percentileTextBox.Name = "percentileTextBox";
             this.percentileTextBox.ReadOnly = true;
-            this.percentileTextBox.Size = new System.Drawing.Size(100, 20);
+            this.percentileTextBox.Size = new System.Drawing.Size(129, 20);
             this.percentileTextBox.TabIndex = 3;
             // 
             // zscoreTextbox
             // 
-            this.zscoreTextbox.Location = new System.Drawing.Point(116, 19);
+            this.zscoreTextbox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.zscoreTextbox.Location = new System.Drawing.Point(150, 23);
             this.zscoreTextbox.Name = "zscoreTextbox";
             this.zscoreTextbox.ReadOnly = true;
-            this.zscoreTextbox.Size = new System.Drawing.Size(100, 20);
+            this.zscoreTextbox.Size = new System.Drawing.Size(129, 20);
             this.zscoreTextbox.TabIndex = 2;
-            // 
-            // pLabel
-            // 
-            this.pLabel.AutoSize = true;
-            this.pLabel.Location = new System.Drawing.Point(7, 48);
-            this.pLabel.Name = "pLabel";
-            this.pLabel.Size = new System.Drawing.Size(65, 13);
-            this.pLabel.TabIndex = 1;
-            this.pLabel.Text = "percentile = ";
             // 
             // zscoreLabel
             // 
             this.zscoreLabel.AutoSize = true;
-            this.zscoreLabel.Location = new System.Drawing.Point(7, 22);
+            this.zscoreLabel.Location = new System.Drawing.Point(6, 26);
             this.zscoreLabel.Name = "zscoreLabel";
             this.zscoreLabel.Size = new System.Drawing.Size(50, 13);
             this.zscoreLabel.TabIndex = 0;
@@ -582,10 +634,10 @@ namespace StatsWithGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(539, 799);
+            this.ClientSize = new System.Drawing.Size(539, 733);
             this.Controls.Add(this.selectedGB);
             this.Controls.Add(this.streamGB);
-            this.Controls.Add(this.histogramContainer);
+            this.Controls.Add(this.graphContainer);
             this.Controls.Add(this.resultsGB);
             this.Controls.Add(this.removeGB);
             this.Controls.Add(this.aboutButton);
@@ -602,8 +654,8 @@ namespace StatsWithGUI
             this.removeGB.ResumeLayout(false);
             this.resultsGB.ResumeLayout(false);
             this.resultsGB.PerformLayout();
-            this.histogramContainer.ResumeLayout(false);
-            this.histogramContainer.PerformLayout();
+            this.graphContainer.ResumeLayout(false);
+            this.graphContainer.PerformLayout();
             this.streamGB.ResumeLayout(false);
             this.streamGB.PerformLayout();
             this.selectedGB.ResumeLayout(false);
@@ -636,7 +688,7 @@ namespace StatsWithGUI
         private System.Windows.Forms.RadioButton mode1;
         private System.Windows.Forms.Label nLabel;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.Panel histogramContainer;
+        private System.Windows.Forms.Panel graphContainer;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.HelpProvider helpProvider1;
@@ -660,9 +712,13 @@ namespace StatsWithGUI
         private System.Windows.Forms.GroupBox selectedGB;
         private System.Windows.Forms.TextBox percentileTextBox;
         private System.Windows.Forms.TextBox zscoreTextbox;
-        private System.Windows.Forms.Label pLabel;
+        private System.Windows.Forms.Label pLabel1;
         private System.Windows.Forms.Label zscoreLabel;
         private System.Windows.Forms.CheckBox importWithoutReplacement;
+        private System.Windows.Forms.TextBox rankCdfDifference;
+        private System.Windows.Forms.TextBox cdfTextBox;
+        private System.Windows.Forms.Label differenceLabel;
+        private System.Windows.Forms.Label pLabel2;
     }
 }
 
